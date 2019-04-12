@@ -4,6 +4,9 @@ output[7:0] value;
 input[7:0] inputA;
 input[7:0] inputB;
 
+wire [3:0] Vexp = value[7:4];  //4 bit exponent
+wire [4:0] Vfrac = value[3:0]; //4 bit fraction
+
 //wire Asign = inputA[7];
 wire [3:0] Aexp = inputA[7:4];  //4 bit exponent
 wire [4:0] Afrac = inputA[3:0]; //4 bit fraction
@@ -25,5 +28,5 @@ reg FPinput;    //floating point input
 reg FPsum;  //floating point sum/output
 
 multiply fp_multiplier(clk, St, Afrac, Aexp, Bfrac, Bexp, F, V, done1);
-add fp_adder(clk, St, done2, ovf, unf, FPinput, FPsum);
+add fp_adder(clk, done1, done2, ovf, unf, FPinput, FPsum);
 endmodule
