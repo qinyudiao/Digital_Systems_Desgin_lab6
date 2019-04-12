@@ -1,27 +1,30 @@
 //from page 421 in book
-module fp_adder(clk, St, done, ovf, unf, FPinput, FPsum);
+module fp_adder(clk, St, done, ovf, unf, Aexp, Afrac, Bexp, Bfrac, FPsum);
 input clk;
 input St;
 output done;
 output ovf;
 output unf;
-input[31:0] FPinput;
-output[31:0] FPsum;
+input[3:0] Aexp;
+input[3:0] Afrac;
+input[3:0] Bexp;
+input[3:0] Bfrac;
+output[7:0] FPsum;
 
 reg done;
 reg ovf;
 reg unf;
 
-reg [25:0] F1;
-reg [25:0] F2;
-reg [7:0] E1;
-reg [7:0] E2;
+reg [4:0] F1;
+reg [4:0] F2;
+reg [2:0] E1;
+reg [2:0] E2;
 reg S1;
 reg S2;
-wire FV;
-wire FU;
-wire [27:0] F1comp;
-wire [27:0] F2comp;
+wire FV; //fraction overflow
+wire FU; //fraction underflow
+wire [4:0] F1comp;
+wire [4:0] F2comp;
 wire [27:0] Addout;
 wire [27:0] Fsum;
 reg [2:0] State;
@@ -31,21 +34,21 @@ initial begin
     done = 0;
     ovf = 0;
     unf = 0;
-    S1 = 0;
-    S2 = 0;
-    F1 = 0;
-    F2 = 0;
-    E1 = 0;
-    E2 = 0;
+    S1 = Aexp[3];   //get A sign
+    S2 = Bexp[3];   //get B sign
+    F1 = Afrac;
+    F2 = Bfrac;
+    E1 = Aexp;
+    E2 = Bexp;
 end
 
-assign F1comp = (S1 == 1'b1) ? ~({2'b00, F1}) + 1 : {2'b00, F1};
-assign F2comp = (S2 == 1'b1) ? ~({2'b00, F2}) + 1 : {2'b00, F2};
-assign Addout = F1comp + F2comp;
-assign Fsum = ((Addout[27]) == 1'b0) ? Addout : ~Addout + 1;
-assign FV = Fsum[27] ^ Fsum[26];
-assign FU = ~F1[25];
-assign FPsum = {S1, E1, F1[24:2]};
+//assign F1comp = (S1 == 1'b1) ? ~({2'b00, F1}) + 1 : {2'b00, F1};
+//assign F2comp = (S2 == 1'b1) ? ~({2'b00, F2}) + 1 : {2'b00, F2};
+//assign Addout = F1comp + F2comp;
+//assign Fsum = ((Addout[27]) == 1'b0) ? Addout : ~Addout + 1;
+//assign FV = Fsum[27] ^ Fsum[26];
+//assign FU = ~F1[25];
+//assign FPsum = {S1, E1, F1[24:2]};
 
 always @(posedge clk)begin
     case(State)
@@ -53,10 +56,10 @@ always @(posedge clk)begin
             begin
                 if(St == 1'b1)
                     begin
-                        E1 <= FPinput[30:23];
-                        S1 <= FPinput[31];
-                        F1[24:0] <= {FPinput[22:0], 2'b00};
-                        if(FPinput == 0)
+//                        E1 <= FPinput[6:4];
+//                        S1 <= FPinput[7];
+//                        F1[4:0] <= {FPinput[3:0], 2'b00};
+                        if(Aexp == 0 && Afrac == 0)
                             begin
                                 F1[25] <= 1'b0;
                             end
@@ -72,9 +75,9 @@ always @(posedge clk)begin
             end
         1:
             begin
-                E2 <= FPinput[20:23];
-                S2 <= FPinput[31];
-                F2[24:0] <= {FPinput[22:0], 2'b00};
+                E2 <= FPinput[6:4];
+                S2 <= FPinput[7];
+                F2[4:0] <= {FPinput[3:0], 2'b00};
                 if(FPinput == 0)
                     begin
                         F2[25] <= 1'b0;
