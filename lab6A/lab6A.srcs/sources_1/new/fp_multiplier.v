@@ -1,3 +1,4 @@
+
 module fp_multiplier(
     input [7:0] inA,    // First input
     input [7:0] inB,    // Second input
