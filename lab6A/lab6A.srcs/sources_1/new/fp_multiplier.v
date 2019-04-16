@@ -1,92 +1,54 @@
-//from page 412 in book
-module fp_multiplier(clk, St, F1, E1, S1, F2, E2, S2, F, V, done);
-input clk;
-input St;
-input [3:0] F1;
-input [2:0] E1;
-input S1;
-input [3:0] F2;
-input [2:0] E2;
-input S2;
-output wire [7:0] F;
-output reg V;   //overflow indicator
-output reg done;    //floating point multiplication compelte
+module fp_multiplier(
+    input [7:0] inA,    // First input
+    input [7:0] inB,    // Second input
+    output [7:0] outC  // Product
+);
 
-reg [3:0] Afrac;
-reg [3:0] Bfrac;
-reg [2:0] Aexp;
-reg [2:0] Bexp;
-reg [3:0] outFrac;
-reg [2:0] outExp;
-reg outSign;
+    // Extract fields of A and B.
+    wire Asign;
+    wire [2:0] Aexp;
+    wire [3:0] Afrac;
+    wire Bsign;
+    wire [2:0] Bexp;
+    wire [3:0] Bfrac;
+    assign Asign = inA[7];
+    assign Aexp = inA[6:4];
+    assign Afrac = {1'b1, inA[3:1]};
+    assign Bsign = inB[7];
+    assign Bexp = inB[6:4];
+    assign Bfrac = {1'b1, inB[3:1]};
 
-reg [4:0] expAdd; //5 bit to check for overflow
+    // XOR sign bits to determine product sign.
+    wire outSign;
+    assign outSign = Asign ^ Bsign;
 
-assign F = {outExp, outFrac};
+    // Multiply the fractions of A and B
+    wire [8:0] pre_prod_frac;
+    assign pre_prod_frac = Afrac * Bfrac;
 
-reg Adx;    //add exponents, starts fraction multiplier
-reg SM8;    //set exponent to -2 (handle special case of 0)
-reg RSF;    //shift fraction right, increment E
-reg LSF;    //shift fraction left, decrement E
-reg Mdone;  //fraction multiply done
-reg [2:0] State;
-reg [2:0] Nextstate;
+    // Add exponents of A and B
+    wire [3:0]  pre_prod_exp;
+    assign pre_prod_exp = Aexp + Bexp;
 
-initial begin
-    Afrac <= F1>>1; //shift fraction over 1 to make room for leading 1
-    Bfrac <= F2>>1;
-    Aexp <= E1;
-    Bexp <= E2;
-    Adx <= 0;
-    SM8 <= 0;
-    RSF <= 0;
-    LSF <= 0;
-    State <= 0;
-    Nextstate <= 0;
-    outExp <= 0;
-    outFrac <= 0;
-    outSign <= S1^S2;
-end
+    // check for overflow, shift right if yes and normalize if no
+    wire [2:0]  outExp;
+    wire [3:0] outFrac;
+    assign outExp = (pre_prod_frac > 4'b1111) ? (pre_prod_exp-2'd2) : (pre_prod_frac[8] ? (pre_prod_exp-3'd4) : (pre_prod_exp - 2'd3));
+    assign outFrac = (pre_prod_frac > 4'b1111) ? {1'b0, pre_prod_frac[7:4]} : (pre_prod_frac[8] ? pre_prod_frac[7:3] : pre_prod_frac[6:2]); //shift bits if not leading 1
 
-always@(*)begin
-    case(State)
-        0: if(St == 1)begin //initialize
-            Afrac[3] = 1'b1;
-            Bfrac[3] = 1'b1;  //set implied 1 for fraction
-            
-            if(Aexp > 3'b100)begin  //if the exponent is greater than 4
-                Aexp = Aexp - 3'b011;  //subtract bias (3) from exponent
-            end
-            else begin
-                
-            end
-            if(Bexp > 3'b100)begin  //if the exponent is greater than 4
-                Bexp = Bexp - 3'b011;  //subtract bias (3) from exponent
-            end
-            else begin
-                
-            end
-            expAdd = Aexp + Bexp; //add exponents
-            
-            if((S1^S2) == 1)begin //if only one number is negative
-                if(S1 == 1)begin //F1 is negative
-                    Afrac = ~(Afrac - 1);
-                end
-                else if(S2 == 1)begin //F2 is negative
-                    Bfrac = ~(Bfrac - 1);
-                end
-            end
-            outFrac = Afrac * Bfrac; //multiply fractions
-            
-            if(outFrac == 4'b0000)begin
-                SM8 <= 1;   //set flag for 0 case
-            end
-            Nextstate = 1;
-        end
-    endcase
-end
+    // LSF: If top bit of product frac is 0, shift left one
+    //    assign outExp = pre_prod_frac[8] ? (pre_prod_exp-3'd4) : (pre_prod_exp - 2'd3); //if not leading 1, only subtract 2 for bias, otherwise subtract 3
+    //    assign outFrac = pre_prod_frac[8] ? pre_prod_frac[7:3] : pre_prod_frac[6:2]; //shift bits if not leading 1
+    //    assign outExp = outFrac ? outExp : 4'b000; 
 
-always@(Nextstate)begin //update state
-    State<=Nextstate;
-end
+    // Detect underflow
+    wire underflow;
+    assign underflow = pre_prod_exp < 4'b1101; //check if exponent is less than -3
+
+    // Detect zero conditions (either product frac doesn't start with 1, or underflow)
+    assign outC = underflow         ? 8'b10000000 :
+                  (Bexp == 3'd0)    ? 8'b10000000 :
+                  (Aexp == 3'd0)    ? 8'b10000000 :
+                  {outSign, outExp, outFrac};
+
 endmodule

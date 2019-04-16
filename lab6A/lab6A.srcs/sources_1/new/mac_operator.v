@@ -27,6 +27,6 @@ reg unf;    //underflow flag
 reg FPinput;    //floating point input
 reg FPsum;  //floating point sum/output
 
-multiply fp_multiplier(clk, St, Afrac, Aexp, Asign, Bfrac, Bexp, Bsign, F, V, done1);
+multiply fp_multiplier(clk, St, Afrac, Aexp, Asign, Bfrac, Bexp, Bsign, F, V, U, done1);
 add fp_adder(clk, done1, done2, ovf, unf, FPinput, FPsum);
 endmodule
