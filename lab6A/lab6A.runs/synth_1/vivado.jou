@@ -1,0 +1,12 @@
+#-----------------------------------------------------------
+# Vivado v2017.2 (64-bit)
+# SW Build 1909853 on Thu Jun 15 18:39:09 MDT 2017
+# IP Build 1909766 on Thu Jun 15 19:58:00 MDT 2017
+# Start of session at: Tue Apr 16 18:19:34 2019
+# Process ID: 1372
+# Current directory: C:/Users/audre/Documents/Documents/2018 Senior UT/Semester 2/EE 460M/lab6/lab6/lab6A/lab6A.runs/synth_1
+# Command line: vivado.exe -log mult_tb.vds -product Vivado -mode batch -messageDb vivado.pb -notrace -source mult_tb.tcl
+# Log file: C:/Users/audre/Documents/Documents/2018 Senior UT/Semester 2/EE 460M/lab6/lab6/lab6A/lab6A.runs/synth_1/mult_tb.vds
+# Journal file: C:/Users/audre/Documents/Documents/2018 Senior UT/Semester 2/EE 460M/lab6/lab6/lab6A/lab6A.runs/synth_1\vivado.jou
+#-----------------------------------------------------------
+source mult_tb.tcl -notrace

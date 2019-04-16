@@ -1,3 +1,4 @@
+`timescale 1ns / 1ps
 
 module fp_multiplier(
     input [7:0] inA,    // First input
@@ -34,22 +35,18 @@ module fp_multiplier(
     // check for overflow, shift right if yes and normalize if no
     wire [2:0]  outExp;
     wire [3:0] outFrac;
-    assign outExp = (pre_prod_frac > 4'b1111) ? (pre_prod_exp-2'd2) : (pre_prod_frac[8] ? (pre_prod_exp-3'd4) : (pre_prod_exp - 2'd3));
-    assign outFrac = (pre_prod_frac > 4'b1111) ? {1'b0, pre_prod_frac[7:4]} : (pre_prod_frac[8] ? pre_prod_frac[7:3] : pre_prod_frac[6:2]); //shift bits if not leading 1
-
-    // LSF: If top bit of product frac is 0, shift left one
-    //    assign outExp = pre_prod_frac[8] ? (pre_prod_exp-3'd4) : (pre_prod_exp - 2'd3); //if not leading 1, only subtract 2 for bias, otherwise subtract 3
-    //    assign outFrac = pre_prod_frac[8] ? pre_prod_frac[7:3] : pre_prod_frac[6:2]; //shift bits if not leading 1
-    //    assign outExp = outFrac ? outExp : 4'b000; 
+    assign outExp = pre_prod_frac[8] ? (pre_prod_exp-3'd4) : (pre_prod_exp - 2'd3);
+    assign outFrac = pre_prod_frac[8] ? pre_prod_frac[7:3] : pre_prod_frac[6:2]; //shift bits if not leading 1
 
     // Detect underflow
     wire underflow;
-    assign underflow = pre_prod_exp < 4'b1101; //check if exponent is less than -3
+    assign underflow = (pre_prod_exp < 4'b1101); //check if exponent is less than -3
+    
+    wire overflow;
+    assign overflow = ((pre_prod_exp > 4'b1010) ? 1'b1 : 1'b0) || (pre_prod_frac > 4'b1111);
 
     // Detect zero conditions (either product frac doesn't start with 1, or underflow)
-    assign outC = underflow         ? 8'b10000000 :
-                  (Bexp == 3'd0)    ? 8'b10000000 :
-                  (Aexp == 3'd0)    ? 8'b10000000 :
+    assign outC = (pre_prod_frac == 9'b0) ? 8'b10000000 :
                   {outSign, outExp, outFrac};
 
 endmodule
