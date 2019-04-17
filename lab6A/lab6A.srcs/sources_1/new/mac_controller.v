@@ -5,41 +5,52 @@ module mac_controller(clk,a00,a01,a02,a10,a11,a12,a20,a21,a22, b00,b01,b02,b10,b
 	input clk;
 	//input rst;
 
-	parameter n = 8; //size of each number (in bits)
+	//parameter n = 8; //size of each number (in bits)
 
-	input [n-1:0] a00,a01,a02,a10,a11,a12,a20,a21,a22;
-	input [n-1:0] b00,b01,b02,b10,b11,b12,b20,b21,b22;
+	input [7:0] a00,a01,a02,a10,a11,a12,a20,a21,a22;
+	input [7:0] b00,b01,b02,b10,b11,b12,b20,b21,b22;
 
-	output reg [n-1:0] o00,o01,o02,o10,o11,o12,o20,o21,o22;
-	wire [n-1:0] v00,v01,v02,v10,v11,v12,v20,v21,v22;
+	output reg [7:0] o00,o01,o02,o10,o11,o12,o20,o21,o22;
+	wire [7:0] tv00,tv01,tv02,tv10,tv11,tv12,tv20,tv21,tv22;
+	reg [7:0] v00,v01,v02,v10,v11,v12,v20,v21,v22;
 
-	wire [n-1:0] iA [0:8];
-	wire [n-1:0] iB [0:8];
-	reg [2:0] state; 
+	wire [7:0] iA00,iA01,iA02,iA10,iA11,iA12,iA20,iA21,iA22;
+	wire [7:0] iB00,iB01,iB02,iB10,iB11,iB12,iB20,iB21,iB22;
+	reg [2:0] state;
 
 	wire st;
+	initial begin
+		v00=0;
+		v01=1; 
+		v02=0;v10=0;v11=0;v12=0;v20=0;v21=0;v22=0;
+		 state = 0;
+	end
+	
+	always@* begin
+				v00=tv00;
+		v01=tv01; 
+		v02=tv02;v10=tv10;v11=tv11;v12=tv12;v20=tv20;v21=tv21;v22=tv22;
+	end
 
-	initial state = 0;
+	mac_operator mac00(tv00, iA00, iB00, st); 	// input clk, input [7:0] A,B, output v
+	mac_operator mac01(tv01, iA01, iB01, st);
+	mac_operator mac02(tv02, iA02, iB02, st);
+	mac_operator mac10(tv10, iA10, iB10, st);
+	mac_operator mac11(tv11, iA11, iB11, st);
+	mac_operator mac12(tv12, iA12, iB12, st);
+	mac_operator mac20(tv20, iA20, iB20, st);
+	mac_operator mac21(tv21, iA21, iB21, st);
+	mac_operator mac22(tv22, iA22, iB22, st);
 
-	mac_operator mac00(v00, iA[0], iB[0], st); 	// input clk, input [7:0] A,B, output v
-	mac_operator mac01(v01, iA[1], iB[1], st);
-	mac_operator mac02(v02, iA[2], iB[2], st);
-	mac_operator mac10(v10, iA[3], iB[3], st);
-	mac_operator mac11(v11, iA[4], iB[4], st);
-	mac_operator mac12(v12, iA[5], iB[5], st);
-	mac_operator mac20(v20, iA[6], iB[6], st);
-	mac_operator mac21(v21, iA[7], iB[7], st);
-	mac_operator mac22(v22, iA[8], iB[8], st);
-
-	fsm f1(clk, state, a00,a01,a02,a10,a11,a12,a20,a21,a22,b00,b01,b02,b10,b11,b12,b20,b21,b22, iA[0],
-			iA[1],iA[2],iA[3],iA[4],iA[5],iA[6],iA[7],iA[8],iB[0],iB[1],iB[2],iB[3],iB[4],iB[5],iB[6],iB[7],iB[8], ready); //iA, iB are outputs
+	fsm f1(clk, state, a00,a01,a02,a10,a11,a12,a20,a21,a22,b00,b01,b02,b10,b11,b12,b20,b21,b22, 
+		iA00,iA01,iA02,iA10,iA11,iA12,iA20,iA21,iA22,iB00,iB01,iB02,iB10,iB11,iB12,iB20,iB21,iB22, ready); //iA, iB are outputs
 
 
 	assign st = clk;	//change st every clk
 
-	always @(v00,v01,v02,v10,v11,v12,v20,v21,v22) begin
+	always @(posedge clk) begin
 		//if value is updated, next state
-		if(state <= 7)
+		if(state < 7)
 			state <= state+1;
 		else
 			state <= state;

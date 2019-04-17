@@ -23,12 +23,13 @@ wire [7:0] cur_value;
 //reg done1;  //done flag
 //reg V;  //overflow flag
 
+
 //reg St2;    //start input for add
 //reg done2;  //done flag 2
 //reg ovf;    //overflow flag
 //reg unf;    //underflow flag
 //reg FPinput;    //floating point input
-wire [7:0] FPsum;  //floating point sum/output
+wire [7:0] FPprod;  //floating point sum/output
 
 //multiply fp_multiplier(clk, St, Afrac, Aexp, Bfrac, Bexp, F, V, done1);
 initial begin
@@ -36,12 +37,12 @@ initial begin
 	counter = 0;
 end
 
-fp_adder f1(inputB, inputC, FPsum);
-fp_adder f2(FPsum, first_pre_value, cur_value);
+fp_multiplier m1(inputB, inputC, FPprod);
+fp_adder f2(FPprod, first_pre_value, cur_value);
 
 assign value = cur_value;
 
-always @*
+always @ (posedge rst)
 	begin
 		if(counter == 0) begin
 			first_pre_value = pre_value;
@@ -52,7 +53,7 @@ always @*
 		end
 	end
 
-always @ (rst)
+always @ (posedge rst)
 	begin
 			counter = 0;
 	end

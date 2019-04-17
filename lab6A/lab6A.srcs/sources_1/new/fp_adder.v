@@ -18,7 +18,7 @@ module fp_adder(num1, num2, result); //module fp_adder(num1, num2, result, overf
   wire [3:0] big_frac, small_frac; //to hold fraction part, 4-bit
   wire [2:0] big_ex, small_ex; //to hold exponent part, 3-bit
   wire [3:0] temp_ex;
-  wire big_sig, small_sig; // signs for
+  wire big_sig, small_sig; // signs
   reg two_comp; // 0 = 2's complement activated
   reg [1:0] zero; // 0->nonzero, 1->num1==0, 2->num2==0
   wire [7:0] temp_result;

@@ -11,8 +11,8 @@ mac_controller mac_c1(clk,a00,a01,a02,a10,a11,a12,a20,a21,a22,
 
 initial begin
 
-$monitor("value of a00=%b,a01=%b,a02=%b,a10=%b,a11=%b,a12=%b,a20=%b,a21=%b,a22=%b, b00=%b,b01=%b,b02=%b,b10=%b,b11=%b,b12=%b,b20=%b,b21=%b,b22=%b,o00=%b,o01=%b,o02=%b,o10=%b,o11=%b,o12=%b,o20=%b,o21=%b,o22=%b",
-			 a00,a01,a02,a10,a11,a12,a20,a21,a22, b00,b01,b02,b10,b11,b12,b20,b21,b22,o00,o01,o02,o10,o11,o12,o20,o21,o22);
+$monitor("value of a00=%b,a01=%b,a02=%b,a10=%b,a11=%b,a12=%b,a20=%b,a21=%b,a22=%b,b00=%b,b01=%b,b02=%b,b10=%b,b11=%b,b12=%b,b20=%b,b21=%b,b22=%b, o00=%b,o01=%b,o02=%b,o10=%b,o11=%b,o12=%b,o20=%b,o21=%b,o22=%b",
+	a00,a01,a02,a10,a11,a12,a20,a21,a22, b00,b01,b02,b10,b11,b12,b20,b21,b22,o00,o01,o02,o10,o11,o12,o20,o21,o22);
 
 clk=0;
 
