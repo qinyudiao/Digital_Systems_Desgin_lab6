@@ -1,4 +1,4 @@
-`timescale 1ns / 1ps
+//`timescale 1ns / 1ps
 
 module fp_multiplier(
     input [7:0] inA,    // First input
@@ -13,6 +13,18 @@ module fp_multiplier(
     wire Bsign;
     wire [2:0] Bexp;
     wire [3:0] Bfrac;
+
+    wire zero;
+    wire z1;
+    wire z2;
+    wire z3;
+    wire z4;
+    assign z1 = (inA == 8'b00000000) ? 1 : 0;
+    assign z2 = (inA == 8'b10000000) ? 1 : 0;
+    assign z3 = (inB == 8'b00000000) ? 1 : 0;
+    assign z4 = (inB == 8'b10000000) ? 1 : 0;
+    assign zero = z1 | z2 | z3 | z4;
+
     assign Asign = inA[7];
     assign Aexp = inA[6:4];
     assign Afrac = {1'b1, inA[3:1]};
@@ -47,8 +59,6 @@ module fp_multiplier(
 
     // Detect zero conditions (either product frac doesn't start with 1, or underflow)
     assign outC = (pre_prod_frac == 9'b0) ? 8'b10000000 :
-                  (inA[3:0] == 4'b0) ? 8'b10000000 : //check if A fraction is 0000
-                  (inB[3:0] == 4'b0) ? 8'b10000000 : //check if B fraction is 0000
-                  {outSign, outExp, outFrac};
+                  (zero ? 8'b00000000 : {outSign, outExp, outFrac});
 
 endmodule
