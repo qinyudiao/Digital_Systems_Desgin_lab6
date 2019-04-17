@@ -47,6 +47,8 @@ module fp_multiplier(
 
     // Detect zero conditions (either product frac doesn't start with 1, or underflow)
     assign outC = (pre_prod_frac == 9'b0) ? 8'b10000000 :
+                  (inA[3:0] == 4'b0) ? 8'b10000000 : //check if A fraction is 0000
+                  (inB[3:0] == 4'b0) ? 8'b10000000 : //check if B fraction is 0000
                   {outSign, outExp, outFrac};
 
 endmodule
